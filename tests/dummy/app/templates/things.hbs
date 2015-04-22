@@ -1,0 +1,11 @@
+<div>
+  {{#if imageLoading}}Loading...{{/if}}
+</div>
+
+<div class="{{if imageLoading 'hidden'}}">
+  {{ella-image
+    src='/apple-coffee-cup-5199.jpg'
+    imageWillLoad='imageWillLoad'
+    imageDidLoad='imageDidLoad'
+  }}
+</div>
