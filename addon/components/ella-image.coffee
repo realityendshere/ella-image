@@ -92,10 +92,10 @@ EllaImageComponent = Ember.Component.extend
       view = @
 
       didImageLoad = (e) ->
-        $img = jQuery(@)
-
         #Do nothing if view instance is destroyed
-        return if get(view, 'isDestroyed')
+        return if get(view, 'isDestroyed') || get(view, 'isDestroying')
+
+        $img = jQuery(@)
 
         #Do nothing if src has changed again since loading began
         current = get(view, 'src') ? ''
@@ -113,7 +113,9 @@ EllaImageComponent = Ember.Component.extend
     @chainable
   ###
   updateSrc: ->
-    set(@, '_src', '')
+    return if get(@, 'isDestroyed') || get(@, 'isDestroying')
+
+    set(@, '_src', null)
 
     # Do nothing if the src property is blank
     return @ if isBlank(get(@, 'src'))
@@ -181,6 +183,8 @@ EllaImageComponent = Ember.Component.extend
     @chainable
   ###
   _syncSrc: ->
+    return if get(@, 'isDestroyed') || get(@, 'isDestroying')
+
     $img = @$()
     setProperties(@, {
       loading: true
