@@ -1,6 +1,6 @@
 {
   "name": "ella-image",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Recyclable image tag.",
   "directories": {
     "doc": "doc",
