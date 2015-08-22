@@ -3,25 +3,27 @@
 jQuery = Ember.$
 get = Ember.get
 set = Ember.set
+setProperties = Ember.setProperties
 computed = Ember.computed
 observer = Ember.observer
 isBlank = Ember.isBlank
 
 ###
-  `` creates an `<img>` element with load event handling
-  that can be used to notify a parent view when a new source image begins and
+  `EllaImageComponent` creates an `<img>` element with load event handling
+  that can be used to notify a parent object when a new source image begins and
   completes loading.
 
-  This view can be used with `Emberella.ListView` to address a bug that causes
-  the image defined by the `src` attribute of previous content to appear for a
-  few moments until an updated image loads.
+  This view can be used with Emberella's ListComponent to address a bug that
+  causes the image defined by the `src` attribute of previous content to appear
+  for a few moments until an updated image loads.
 
   @class EllaImageComponent
-  @namespace Emberella
   @extends Ember.Component
 ###
 
 EllaImageComponent = Ember.Component.extend
+
+  _src: computed.oneWay 'src'
 
   ###
     Add the class name `emberella-image`.
@@ -37,9 +39,9 @@ EllaImageComponent = Ember.Component.extend
 
     @property classNameBindings
     @type Array
-    @default [ 'loading' ]
+    @default ['loading']
   ###
-  classNameBindings: [ 'loading' ]
+  classNameBindings: ['loading']
 
   ###
     The type of element to create for this view.
@@ -58,7 +60,7 @@ EllaImageComponent = Ember.Component.extend
     @type Array
     @default ['alt', 'title', 'draggable', 'width', 'height']
   ###
-  attributeBindings: ['alt', 'title', 'draggable', 'width', 'height']
+  attributeBindings: ['alt', 'title', 'draggable', 'width', 'height', '_src:src']
 
   ###
     Tracks loading state of the image element. Should be true when an image
@@ -66,9 +68,9 @@ EllaImageComponent = Ember.Component.extend
 
     @property loading
     @type Boolean
-    @default false
+    @default true
   ###
-  loading: false
+  loading: true
 
   ###
     The src path (URL) of the image to display in this element.
@@ -91,14 +93,13 @@ EllaImageComponent = Ember.Component.extend
 
       didImageLoad = (e) ->
         $img = jQuery(@)
-        $img.off('load.image-view', didImageLoad)
 
         #Do nothing if view instance is destroyed
         return if get(view, 'isDestroyed')
 
         #Do nothing if src has changed again since loading began
         current = get(view, 'src') ? ''
-        loaded = $img.attr('src').substr(-(current.length))
+        loaded = $img.attr('src')?.substr(-(current.length))
         return unless loaded is current
 
         set(view, 'loading', false) if $img.prop 'complete' #exit loading state
@@ -112,20 +113,11 @@ EllaImageComponent = Ember.Component.extend
     @chainable
   ###
   updateSrc: ->
-    $img = @$()
-    src = get(@, 'src')
-    didImageLoad = get @, 'didImageLoad'
-
-    $img.removeAttr 'src'
+    set(@, '_src', '')
 
     # Do nothing if the src property is blank
-    return @ if isBlank(src)
-
-    set @, 'loading', true #enter loading state
-
-    $img.on('load.image-view', didImageLoad)
-    $img.attr('src', src)
-    didImageLoad.call($img) if $img.prop 'complete'
+    return @ if isBlank(get(@, 'src'))
+    Ember.run.scheduleOnce('afterRender', @, '_syncSrc')
     @
 
   ###
@@ -139,13 +131,9 @@ EllaImageComponent = Ember.Component.extend
   )
 
   ###
-    Trigger actions when the loading state changes. This allows, for example,
-    styling a parent element differently while waiting for an image to
+    Trigger `action` when the loading state changes. This allows, for example,
+    styling another element differently while waiting for an image to
     finish loading.
-
-    Triggers an `imageWillLoad` action when loading begins.
-
-    Trigger an `imageDidLoad` action when loading completes.
 
     @method loadingDidChange
     @chainable
@@ -155,14 +143,50 @@ EllaImageComponent = Ember.Component.extend
     @
   )
 
-  _setupElement: Ember.on('didInsertElement', ->
-    Ember.run.scheduleOnce('afterRender', @, 'srcDidChange')
-  )
+  ###
+    @private
 
-  _teardownElement: Ember.on('willDestroyElement', ->
+    Setup load handler when img inserted into the DOM.
+
+    @method _setupElement
+    @return null
+  ###
+  _setupElement: Ember.on('didInsertElement', ->
     $img = @$()
     didImageLoad = get @, 'didImageLoad'
-    $img.off('load.image-view', didImageLoad)
+    $img.on('load.image-view', didImageLoad)
+    null
   )
+
+  ###
+    @private
+
+    Teardown load handler when img about to be removed from DOM.
+
+    @method _teardownElement
+    @return null
+  ###
+  _teardownElement: Ember.on('willDestroyElement', ->
+    $img = @$()
+    $img.off('load.image-view', get(@, 'didImageLoad'))
+    null
+  )
+
+  ###
+    @private
+
+    Set `_src` to `src`.
+
+    @method _syncSrc
+    @chainable
+  ###
+  _syncSrc: ->
+    $img = @$()
+    setProperties(@, {
+      loading: true
+      _src: get(@, 'src')
+    })
+    get(@, 'didImageLoad').call($img) if $img.prop 'complete'
+    @
 
 `export default EllaImageComponent`
