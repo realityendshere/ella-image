@@ -5,7 +5,7 @@ get = Ember.get
 set = Ember.set
 computed = Ember.computed
 observer = Ember.observer
-
+isBlank = Ember.isBlank
 
 ###
   `` creates an `<img>` element with load event handling
@@ -56,9 +56,9 @@ EllaImageComponent = Ember.Component.extend
 
     @property attributeBindings
     @type Array
-    @default ['style', 'alt', 'title', 'draggable', 'width', 'height']
+    @default ['alt', 'title', 'draggable', 'width', 'height']
   ###
-  attributeBindings: ['style', 'alt', 'title', 'draggable', 'width', 'height']
+  attributeBindings: ['alt', 'title', 'draggable', 'width', 'height']
 
   ###
     Tracks loading state of the image element. Should be true when an image
@@ -101,7 +101,7 @@ EllaImageComponent = Ember.Component.extend
         loaded = $img.attr('src').substr(-(current.length))
         return unless loaded is current
 
-        set view, 'loading', false #exit loading state
+        set(view, 'loading', false) if $img.prop 'complete' #exit loading state
   })
 
   ###
@@ -118,9 +118,8 @@ EllaImageComponent = Ember.Component.extend
 
     $img.removeAttr 'src'
 
-    # Do nothing if the src property is empty
-    if jQuery.trim(src) is ''
-      return @
+    # Do nothing if the src property is blank
+    return @ if isBlank(src)
 
     set @, 'loading', true #enter loading state
 
@@ -152,13 +151,12 @@ EllaImageComponent = Ember.Component.extend
     @chainable
   ###
   loadingDidChange: observer('loading', ->
-    evt = if get(@, 'loading') then 'imageWillLoad' else 'imageDidLoad'
-    @sendAction(evt) if Ember.typeOf(get(@, evt)) is 'string'
+    @sendAction('action', get(@, 'loading'))
     @
   )
 
   _setupElement: Ember.on('didInsertElement', ->
-    @updateSrc()
+    Ember.run.scheduleOnce('afterRender', @, 'srcDidChange')
   )
 
   _teardownElement: Ember.on('willDestroyElement', ->
