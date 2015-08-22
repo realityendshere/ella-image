@@ -1,15 +1,19 @@
 `import Ember from 'ember'`
 
+set = Ember.set
+
 EllaImageLoaderComponent = Ember.Component.extend
+  classNames: 'ella-image-loader'
+
   classNameBindings: ['loading']
+
+  src: ''
 
   loading: false
 
   actions:
-    imageWillLoad: ->
-      @set('loading', true)
+    imageStateChange: (value) ->
+      Ember.run.next => set(@, 'loading', value)
+      true
 
-    imageDidLoad: ->
-      @set('loading', false)
-
-`export default EllaImageComponent`
+`export default EllaImageLoaderComponent`
