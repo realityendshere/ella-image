@@ -6,6 +6,7 @@ Router = Ember.Router.extend
 
 Router.map () ->
   @route 'index', path: '/'
-  @route 'things'
+  @route 'image'
+  @route 'loader'
 
 `export default Router`

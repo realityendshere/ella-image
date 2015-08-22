@@ -5,19 +5,6 @@
   <a {{action 'changeSrc' 'restaurant-red-beans-coffee.jpg'}}>Image 4</a>
 </div>
 
-<div>
-  {{#if imageLoading}}Loading...{{/if}}
-</div>
-
 <div class="{{if imageLoading 'hidden'}}">
-  {{ella-image
-    src=imageSrc
-    imageWillLoad='imageWillLoad'
-    imageDidLoad='imageDidLoad'
-  }}
+  {{ella-image-loader src=imageSrc}}
 </div>
-
-
-
-
-

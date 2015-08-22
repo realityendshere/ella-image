@@ -1,10 +1,7 @@
 `import Ember from 'ember'`
 
-ThingsRoute = Ember.Route.extend
+ImageRoute = Ember.Route.extend
   setupController: (controller, model) ->
     controller.set('errorMessage', null)
 
-`export default ThingsRoute`
-
-
-
+`export default ImageRoute`

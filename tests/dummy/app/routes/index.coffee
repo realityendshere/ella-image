@@ -1,6 +1,6 @@
 `import Ember from 'ember'`
 
 IndexRoute = Ember.Route.extend
-  redirect: -> @transitionTo 'things'
+  redirect: -> @transitionTo 'image'
 
 `export default IndexRoute`
