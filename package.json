@@ -1,7 +1,7 @@
 {
   "name": "ella-image",
   "version": "0.1.1",
-  "description": "Recyclable image tag for use with lazy list views.",
+  "description": "Recyclable image tag.",
   "directories": {
     "doc": "doc",
     "test": "tests"
